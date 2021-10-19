@@ -32,11 +32,11 @@ You can also use CMake GUI to configure your project.
 
 The tutorials can now be built using:
 ```
-cmake --build . --targe install
+cmake --build . --target install
 ```
 Under Windows, when using MSVC, you can also pass the configuration
 ```
-cmake --build . --config Release --targe install
+cmake --build . --config Release --target install
 ```
 
 ## Screenshots
