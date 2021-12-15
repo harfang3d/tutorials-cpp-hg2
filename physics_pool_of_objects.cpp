@@ -75,20 +75,27 @@ int main(int narg, const char **args) {
 
 	// Create a board.
 	// -- bottom
+	hg::Node n;
+
 	hg::ModelRef mdl_ref = resources.models.Add("ground", hg::CreateCubeModel(vs_decl, 100, 1, 100));
-	hg::CreatePhysicCube(scene, hg::Vec3(30.f, 1.f, 30.f), hg::TranslationMat4(hg::Vec3(0.f, -.5f, 0.f)), mdl_ref, { ground_mat }, 0.f);
-	
+	n = hg::CreatePhysicCube(scene, hg::Vec3(30.f, 1.f, 30.f), hg::TranslationMat4(hg::Vec3(0.f, -.5f, 0.f)), mdl_ref, { ground_mat }, 0.f);
+	n.GetRigidBody().SetType(hg::RBT_Static);
+
 	mdl_ref = resources.models.Add("wall_lr", hg::CreateCubeModel(vs_decl, 1, 11, 32));
 	// -- left wall
-	hg::CreatePhysicCube(scene, hg::Vec3(1.f, 11.f, 32.f), hg::TranslationMat4(hg::Vec3(-15.5f, -.5f, 0.f)), mdl_ref, { walls_mat }, 0.f);
+	n = hg::CreatePhysicCube(scene, hg::Vec3(1.f, 11.f, 32.f), hg::TranslationMat4(hg::Vec3(-15.5f, -.5f, 0.f)), mdl_ref, { walls_mat }, 0.f);
+	n.GetRigidBody().SetType(hg::RBT_Static);
 	// -- right wall
-	hg::CreatePhysicCube(scene, hg::Vec3(1.f, 11.f, 32.f), hg::TranslationMat4(hg::Vec3(15.5f, -.5f, 0.f)), mdl_ref, { walls_mat }, 0.f);
-	
+	n = hg::CreatePhysicCube(scene, hg::Vec3(1.f, 11.f, 32.f), hg::TranslationMat4(hg::Vec3(15.5f, -.5f, 0.f)), mdl_ref, { walls_mat }, 0.f);
+	n.GetRigidBody().SetType(hg::RBT_Static);
+
 	mdl_ref = resources.models.Add("wall_tb", hg::CreateCubeModel(vs_decl, 32, 11, 1));
 	// -- bottom wall
-	hg::CreatePhysicCube(scene, hg::Vec3(32.f, 11.f, 1.f), hg::TranslationMat4(hg::Vec3(0.f, -.5f, -15.5f)), mdl_ref, { walls_mat }, 0.f);
+	n = hg::CreatePhysicCube(scene, hg::Vec3(32.f, 11.f, 1.f), hg::TranslationMat4(hg::Vec3(0.f, -.5f, -15.5f)), mdl_ref, { walls_mat }, 0.f);
+	n.GetRigidBody().SetType(hg::RBT_Static);
 	// -- top wall
-	hg::CreatePhysicCube(scene, hg::Vec3(32.f, 11.f, 1.f), hg::TranslationMat4(hg::Vec3(0.f, -.5f, 15.5f)), mdl_ref, { walls_mat }, 0.f);
+	n = hg::CreatePhysicCube(scene, hg::Vec3(32.f, 11.f, 1.f), hg::TranslationMat4(hg::Vec3(0.f, -.5f, 15.5f)), mdl_ref, { walls_mat }, 0.f);
+	n.GetRigidBody().SetType(hg::RBT_Static);
 
 	// Create physic system.
 	hg::SceneClocks clocks;

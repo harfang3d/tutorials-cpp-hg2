@@ -42,6 +42,15 @@ elseif(UNIX)
 	target_link_libraries(basic_loop pthread)
 endif()
 
+# Controllers
+add_executable(game_mouse_flight game_mouse_flight.cpp)
+target_link_libraries(game_mouse_flight hg::engine hg::foundation hg::platform)
+if(WIN32)
+	set_target_properties(game_mouse_flight PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/bin)
+elseif(UNIX)
+	target_link_libraries(game_mouse_flight pthread)
+endif()
+
 # Nodes
 add_executable(scene_many_nodes scene_many_nodes.cpp)
 target_link_libraries(scene_many_nodes hg::engine hg::foundation hg::platform)
@@ -49,6 +58,15 @@ if(WIN32)
 	set_target_properties(scene_many_nodes PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/bin)
 elseif(UNIX)
 	target_link_libraries(scene_many_nodes pthread)
+endif()
+
+# Scene instances
+add_executable(scene_instances scene_instances.cpp)
+target_link_libraries(scene_instances hg::engine hg::foundation hg::platform)
+if(WIN32)
+	set_target_properties(scene_instances PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/bin)
+elseif(UNIX)
+	target_link_libraries(scene_instances pthread)
 endif()
 
 # Physics
@@ -60,9 +78,8 @@ elseif(UNIX)
 	target_link_libraries(physics_pool_of_objects pthread)
 endif()
 
-
 # install binary, runtime dependencies and data dependencies
-install(TARGETS basic_loop scene_many_nodes physics_pool_of_objects DESTINATION bin)
+install(TARGETS basic_loop game_mouse_flight scene_many_nodes scene_instances physics_pool_of_objects DESTINATION bin)
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/resources_compiled/ DESTINATION bin/resources_compiled)
 
 install_cppsdk_dependencies(bin dep)

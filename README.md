@@ -43,8 +43,14 @@ cmake --build . --config Release --target install
 * Basic window
 [![Basic window](screenshots/basic_loop.png)](basic_loop.cpp)
 
+* Mouse flight
+[![Basic window](screenshots/game_mouse_flight.png)](game_mouse_flight.cpp)
+
 * Physics pool of objects
 [![Physics pool](screenshots/physics_pool_of_objects.png)](physics_pool_of_objects.cpp)
+
+* Scene instances
+[![Instances](screenshots/scene_instances.png)](scene_instances.cpp)
 
 * Scene with many nodes
 [![Many object nodes](screenshots/scene_many_nodes.png)](scene_many_nodes.cpp)
