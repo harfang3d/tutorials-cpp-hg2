@@ -129,7 +129,7 @@ int main() {
 
 		// update gameplay elements (plane & camera)
 		update_plane(plane_node, mouse_x_normd, mouse_y_normd, setting_plane_speed, setting_plane_mouse_sensitivity);
-		update_chase_camera(camera_node, setting_camera_chase_offset * plane_node.GetTransform().GetWorld(), setting_camera_chase_distance);
+		update_chase_camera(camera_node, plane_node.GetTransform().GetWorld() * setting_camera_chase_offset, setting_camera_chase_distance);
 
 		// update scene and submit it to render pipeline
 		scene.Update(dt);
