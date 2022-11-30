@@ -13,19 +13,22 @@ get_filename_component(HG_CPPSDK_PATH ${HG_CPPSDK_PATH} ABSOLUTE)
 set(HG_ASSETC_PATH CACHE PATH "Path to the Harfang Assets Compiler" )
 get_filename_component(HG_ASSETC_PATH ${HG_ASSETC_PATH} ABSOLUTE)
 
+set(CMAKE_SKIP_BUILD_RPATH  FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+if(NOT APPLE)
+        set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
+	set(CMAKE_INSTALL_RPATH $ORIGIN)
+else()
+	set(MACOSX_RPATH TRUE)
+	set(CMAKE_INSTALL_RPATH @loader_path)
+endif()
+
 find_package(harfang REQUIRED
     COMPONENTS cppsdk
     PATHS ${HG_CPPSDK_PATH}
     NO_DEFAULT_PATH
 )
-
-if(NOT APPLE)
-	set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
-	set(CMAKE_SKIP_BUILD_RPATH  FALSE)
-	set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-	set(CMAKE_INSTALL_RPATH $ORIGIN)
-endif()
-
+	
 # Resources compilation
 add_custom_target(resources ALL
 	COMMAND ${HG_ASSETC_PATH}/assetc ${CMAKE_CURRENT_SOURCE_DIR}/resources ${CMAKE_CURRENT_BINARY_DIR}/resources_compiled -api ${HG_GRAPHIC_API} -t ${HG_ASSETC_PATH}/toolchains/host-${HG_HOST_PREFIX}-target-${HG_TARGET_PREFIX}
