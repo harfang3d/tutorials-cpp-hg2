@@ -72,6 +72,15 @@ elseif(UNIX)
 	target_link_libraries(scene_instances pthread)
 endif()
 
+# Scene draw to texture
+add_executable(scene_draw_to_texture scene_draw_to_texture.cpp)
+target_link_libraries(scene_draw_to_texture hg::engine hg::foundation hg::platform)
+if(WIN32)
+	set_target_properties(scene_draw_to_texture PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/bin)
+elseif(UNIX)
+	target_link_libraries(scene_draw_to_texture pthread)
+endif()
+
 # Physics
 add_executable(physics_pool_of_objects physics_pool_of_objects.cpp)
 target_link_libraries(physics_pool_of_objects hg::engine hg::foundation hg::platform)
