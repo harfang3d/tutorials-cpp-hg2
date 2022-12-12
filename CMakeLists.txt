@@ -55,6 +55,15 @@ elseif(UNIX)
 endif()
 
 # Nodes
+add_executable(material_update_value material_update_value.cpp)
+target_link_libraries(material_update_value hg::engine hg::foundation hg::platform)
+if(WIN32)
+	set_target_properties(material_update_value PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/bin)
+elseif(UNIX)
+	target_link_libraries(material_update_value pthread)
+endif()
+
+# Nodes
 add_executable(scene_many_nodes scene_many_nodes.cpp)
 target_link_libraries(scene_many_nodes hg::engine hg::foundation hg::platform)
 if(WIN32)
@@ -109,7 +118,7 @@ elseif(UNIX)
 endif()
 
 # install binary, runtime dependencies and data dependencies
-install(TARGETS basic_loop game_mouse_flight scene_many_nodes scene_instances physics_pool_of_objects imgui_basic scene_aaa DESTINATION bin)
+install(TARGETS basic_loop game_mouse_flight scene_many_nodes scene_instances physics_pool_of_objects imgui_basic scene_aaa material_update_value DESTINATION bin)
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/resources_compiled/ DESTINATION bin/resources_compiled)
 
 install_cppsdk_dependencies(bin dep)
