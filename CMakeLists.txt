@@ -80,6 +80,15 @@ if(WIN32)
 elseif(UNIX)
 	target_link_libraries(scene_draw_to_texture pthread)
 endif()
+	
+# Scene "AAA" render
+add_executable(scene_aaa scene_aaa.cpp)
+target_link_libraries(scene_aaa hg::engine hg::foundation hg::platform)
+if(WIN32)
+	set_target_properties(scene_aaa PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/bin)
+elseif(UNIX)
+	target_link_libraries(scene_aaa pthread)
+endif()
 
 # Physics
 add_executable(physics_pool_of_objects physics_pool_of_objects.cpp)
@@ -90,8 +99,17 @@ elseif(UNIX)
 	target_link_libraries(physics_pool_of_objects pthread)
 endif()
 
+# ImGUI basic
+add_executable(imgui_basic imgui_basic.cpp)
+target_link_libraries(imgui_basic hg::engine hg::foundation hg::platform)
+if(WIN32)
+	set_target_properties(imgui_basic PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/bin)
+elseif(UNIX)
+	target_link_libraries(imgui_basic pthread)
+endif()
+
 # install binary, runtime dependencies and data dependencies
-install(TARGETS basic_loop game_mouse_flight scene_many_nodes scene_instances physics_pool_of_objects DESTINATION bin)
+install(TARGETS basic_loop game_mouse_flight scene_many_nodes scene_instances physics_pool_of_objects imgui_basic scene_aaa DESTINATION bin)
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/resources_compiled/ DESTINATION bin/resources_compiled)
 
 install_cppsdk_dependencies(bin dep)
