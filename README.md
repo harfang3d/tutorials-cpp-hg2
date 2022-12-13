@@ -1,4 +1,4 @@
-# HARFANG® 3.0 Tutorials
+# HARFANG® 3.2.5+ Tutorials
 
 These **tutorials** demonstrate the usage of the HARFANG 3.0 C++ API.
 
