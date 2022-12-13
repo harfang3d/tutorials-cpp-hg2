@@ -99,13 +99,22 @@ elseif(UNIX)
 	target_link_libraries(scene_aaa pthread)
 endif()
 
-# VR scene
+# VR scene (OpenVR)
 add_executable(scene_vr scene_vr.cpp)
 target_link_libraries(scene_vr hg::engine hg::foundation hg::platform)
 if(WIN32)
 	set_target_properties(scene_vr PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/bin)
 elseif(UNIX)
 	target_link_libraries(scene_vr pthread)
+endif()
+
+# VR scene (OpenXR)
+add_executable(scene_xr scene_xr.cpp)
+target_link_libraries(scene_xr hg::engine hg::foundation hg::platform)
+if(WIN32)
+	set_target_properties(scene_xr PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/bin)
+elseif(UNIX)
+	target_link_libraries(scene_xr pthread)
 endif()
 
 # Physics
@@ -127,7 +136,7 @@ elseif(UNIX)
 endif()
 
 # install binary, runtime dependencies and data dependencies
-install(TARGETS basic_loop game_mouse_flight scene_many_nodes scene_instances physics_pool_of_objects imgui_basic scene_aaa material_update_value scene_vr DESTINATION bin)
+install(TARGETS basic_loop game_mouse_flight scene_many_nodes scene_instances physics_pool_of_objects imgui_basic scene_aaa material_update_value scene_vr scene_xr DESTINATION bin)
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/resources_compiled/ DESTINATION bin/resources_compiled)
 
 install_cppsdk_dependencies(bin dep)

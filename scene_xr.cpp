@@ -1,6 +1,6 @@
 // HARFANG(R) Copyright (C) 2022 NWNC HARFANG. Released under GPL/LGPL/Commercial Licence, see licence.txt for details.
 
-// Display a scene in VR using OpenVR
+// Display a scene in VR using OpenXR
 
 #include <foundation/clock.h>
 #include <foundation/projection.h>
@@ -14,9 +14,9 @@
 #include <engine/scene_forward_pipeline.h>
 #include <engine/forward_pipeline.h>
 #include <engine/create_geometry.h>
-#include <engine/openvr_api.h>
+#include <engine/openxr_api.h>
 
-static hg::Material create_material(hg::PipelineProgramRef prg_ref, const hg::Vec4 &ubc, const hg::Vec4& orm) {
+static hg::Material create_material(hg::PipelineProgramRef prg_ref, const hg::Vec4& ubc, const hg::Vec4& orm) {
 	hg::Material mat;
 	hg::SetMaterialProgram(mat, prg_ref);
 	hg::SetMaterialValue(mat, "uBaseOpacityColor", ubc);
@@ -38,24 +38,23 @@ int main() {
 
 	// create forward pipeline and resources.
 	hg::ForwardPipeline pipeline = hg::CreateForwardPipeline();
-	hg::PipelineResources res = hg::PipelineResources();
+	hg::PipelineResources res;
 
 	hg::SceneForwardPipelineRenderData render_data; // this object is used by the low - level scene rendering API to share view - independent data with both eyes
 
-	// OpenVR initialization
-	if (!hg::OpenVRInit()) {
+	// OpenXR initialization
+	if (!hg::OpenXRInit()) {
 		exit(EXIT_FAILURE);
 	}
 
-	hg::OpenVREyeFrameBuffer vr_left_fb = hg::OpenVRCreateEyeFrameBuffer(hg::OVRAA_MSAA4x);
-	hg::OpenVREyeFrameBuffer vr_right_fb = hg::OpenVRCreateEyeFrameBuffer(hg::OVRAA_MSAA4x);
+	std::vector<hg::OpenXREyeFrameBuffer> eye_framebuffers = hg::OpenXRCreateEyeFrameBuffer(hg::OXRAA_MSAA4x);
 
 	// create models
 	bgfx::VertexLayout vtx_layout = hg::VertexLayoutPosFloatNormUInt8();
 
 	hg::Model cube_mdl = hg::CreateCubeModel(vtx_layout, 1, 1, 1);
 	hg::ModelRef cube_ref = res.models.Add("cube", cube_mdl);
-	
+
 	hg::Model ground_mdl = hg::CreateCubeModel(vtx_layout, 50, 0.01f, 50);
 	hg::ModelRef ground_ref = res.models.Add("ground", ground_mdl);
 
@@ -97,6 +96,15 @@ int main() {
 
 	std::vector<hg::UniformSetTexture> quad_uniform_set_texture_list;
 
+	hg::SceneForwardPipelinePassViewId passId;
+
+	std::function<void(hg::Mat4*)> update_controllers = [](hg::Mat4* head) {};
+
+	std::function<uint16_t(hg::iRect*, hg::ViewState*, uint16_t*, bgfx::FrameBufferHandle* fb)> draw_scene = [&scene, &pipeline, &res, &render_data, &passId](hg::iRect* rect, hg::ViewState* view_state, uint16_t* view_id, bgfx::FrameBufferHandle* fb) -> uint16_t {
+		hg::PrepareSceneForwardPipelineViewDependentRenderData(*view_id, *view_state, scene, render_data, pipeline, res, passId);
+		hg::SubmitSceneToForwardPipeline(*view_id, scene, *rect, *view_state, pipeline, render_data, res, passId, *fb);
+		return *view_id;
+	};
 
 	// main loop
 	hg::Keyboard keyboard;
@@ -110,42 +118,32 @@ int main() {
 
 		hg::Mat4 actor_body_mtx = hg::TransformationMat4(hg::Vec3(-1.3f, .45f, -2.f), hg::Vec3::Zero);
 
-		hg::ViewState left, right;
-		hg::OpenVRState vr_state = hg::OpenVRGetState(actor_body_mtx, 0.01f, 1000.f);
-		hg::OpenVRStateToViewState(vr_state, left, right);
-
 		bgfx::ViewId vid = 0;  // keep track of the next free view id
-		hg::SceneForwardPipelinePassViewId passId;
+		passId.fill(0);
 
 		// prepare view - independent render data once
 		hg::PrepareSceneForwardPipelineCommonRenderData(vid, scene, render_data, pipeline, res, passId);
-		hg::iRect vr_eye_rect(0, 0, vr_state.width, vr_state.height);
-
-		// prepare the left eye render data then draw to its framebuffer
-		hg::PrepareSceneForwardPipelineViewDependentRenderData(vid, left, scene, render_data, pipeline, res, passId);
-		hg::SubmitSceneToForwardPipeline(vid, scene, vr_eye_rect, left, pipeline, render_data, res, passId, vr_left_fb.fb);
-
-		// repare the right eye render data then draw to its framebuffer
-		hg::PrepareSceneForwardPipelineViewDependentRenderData(vid, right, scene, render_data, pipeline, res, passId);
-		hg::SubmitSceneToForwardPipeline(vid, scene, vr_eye_rect, right, pipeline, render_data, res, passId, vr_right_fb.fb);
+		hg::OpenXRFrameInfo openxrFrameInfo = hg::OpenXRSubmitSceneToForwardPipeline(hg::TranslationMat4(hg::Vec3::Zero), update_controllers, draw_scene, vid, 0.1f, 100.f);
 
 		// display the VR eyes texture to the backbuffer
 		bgfx::setViewRect(vid, 0, 0, res_x, res_y);
 		hg::ViewState vs = hg::ComputeOrthographicViewState(hg::TranslationMat4(hg::Vec3::Zero), (float)res_y, 0.1f, 100.f, hg::ComputeAspectRatioX((float)res_x, (float)res_y));
 		bgfx::setViewTransform(vid, hg::to_bgfx(vs.view).data(), hg::to_bgfx(vs.proj).data());
 
-		quad_uniform_set_texture_list.clear();
-		quad_uniform_set_texture_list.push_back(hg::MakeUniformSetTexture("s_tex", hg::OpenVRGetColorTexture(vr_left_fb), 0));
-		hg::SetT(quad_matrix, hg::Vec3(eye_t_x, 0.f, 1.f));
-		hg::DrawModel(vid, quad_model, tex0_program, quad_uniform_set_value_list, quad_uniform_set_texture_list, &quad_matrix, 1, quad_render_state);
+		if (openxrFrameInfo.id_fbs.size() > 0) {
+			quad_uniform_set_texture_list.clear();
+			quad_uniform_set_texture_list.push_back(hg::MakeUniformSetTexture("s_tex", hg::OpenXRGetColorTextureFromId(eye_framebuffers, openxrFrameInfo, 0), 0));
+			hg::SetT(quad_matrix, hg::Vec3(eye_t_x, 0, 1));
+			hg::DrawModel(vid, quad_model, tex0_program, quad_uniform_set_value_list, quad_uniform_set_texture_list, &quad_matrix, 1, quad_render_state);
 
-		quad_uniform_set_texture_list.clear();
-		quad_uniform_set_texture_list.push_back(hg::MakeUniformSetTexture("s_tex", hg::OpenVRGetColorTexture(vr_right_fb), 0));
-		hg::SetT(quad_matrix, hg::Vec3(-eye_t_x, 0.f, 1.f));
-		hg::DrawModel(vid, quad_model, tex0_program, quad_uniform_set_value_list, quad_uniform_set_texture_list, &quad_matrix, 1, quad_render_state);
-					
+			quad_uniform_set_texture_list.clear();
+			quad_uniform_set_texture_list.push_back(hg::MakeUniformSetTexture("s_tex", hg::OpenXRGetColorTextureFromId(eye_framebuffers, openxrFrameInfo, 1), 0));
+			hg::SetT(quad_matrix, hg::Vec3(-eye_t_x, 0, 1));
+			hg::DrawModel(vid, quad_model, tex0_program, quad_uniform_set_value_list, quad_uniform_set_texture_list, &quad_matrix, 1, quad_render_state);
+		}
+
 		bgfx::frame();
-		hg::OpenVRSubmitFrame(vr_left_fb, vr_right_fb);
+		hg::OpenXRFinishSubmitFrameBuffer(openxrFrameInfo);
 		hg::UpdateWindow(win);
 	}
 
