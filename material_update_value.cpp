@@ -35,7 +35,7 @@ int main() {
 	hg::Model cube_mdl = hg::CreateCubeModel(vtx_layout, 1, 1, 1);
 	hg::ModelRef cube_ref = res.models.Add("cube", cube_mdl);
 	
-	hg::Model ground_mdl = hg::CreateCubeModel(vtx_layout, 100, 0.01, 100);
+	hg::Model ground_mdl = hg::CreateCubeModel(vtx_layout, 100, 0.01f, 100);
 	hg::ModelRef ground_ref = res.models.Add("ground", ground_mdl);
 
 	// create materials
